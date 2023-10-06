@@ -24,5 +24,8 @@ services:
     volumes:
       - ./app:/app
     environment:
-      DATABASE_URL: postgresql://postgres:password@db:5432/postgres
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:?password missing}@db:5432/postgres
       JWT_SECRET: ${JWT_SECRET:?JWT SECRET REQUIRED}
+      CARDBOARD_TOKEN: ${CARDBOARD_TOKEN:?Get token at https://cardboard.ink/}
+      CARDBOARD_SECRET: ${CARDBOARD_SECRET:?Get secret at https://cardboard.ink/}
+      PUBLIC_CARDBOARD_URL: ${PUBLIC_CARDBOARD_URL:?Get url at https://cardboard.ink/}
