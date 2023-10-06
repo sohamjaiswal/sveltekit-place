@@ -6,46 +6,32 @@
  * See how to use a different db: https://zenstack.dev/#/zmodel-data-source.
  */
 datasource db {
-    provider = 'sqlite'
-    url = 'file:./dev.db'
+    provider = "postgresql"
+    url = env("DATABASE_URL")
 }
 
 generator client {
     provider = "prisma-client-js"
+    binaryTargets = ["native"]
+}
+
+abstract model _base {
+    createdAt DateTime @default(now())
+    editedAt DateTime @default(now())
 }
 
 /**
  * User model
  */
-model User {
-    id String @id @default(cuid())
-    email String @unique @email
-    password String @password @omit @length(8, 16)
-    posts Post[]
-
-    // everybody can signup
-    @@allow('create', true)
+model User extends _base {
+    id String @id @unique
+    username String 
+    avatar String @default("/poop.png")
+    banner String @default("https://img.guildedcdn.com/asset/Default/ProfileBannerLarge.png")
+     // everybody can signup
+    @@allow('create,read', true)
 
     // full access by self
     @@allow('all', auth() == this)
 }
 
-/**
- * Post model
- */
-model Post {
-    id String @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    title String @length(1, 256)
-    content String
-    published Boolean @default(false)
-    author User? @relation(fields: [authorId], references: [id])
-    authorId String?
-
-    // allow read for all signin users
-    @@allow('read', auth() != null && published)
-
-    // full access by author
-    @@allow('all', author == auth())
-}
