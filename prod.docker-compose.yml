@@ -6,7 +6,7 @@ services:
     image: postgres:16-alpine
     restart: always
     environment:
-      POSTGRES_PASSWORD: ${DB_PASSWORD-password}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB PASSWORD REQUIRED}
     volumes:
       - ./db:/var/lib/postgresql/data
     ports:
@@ -15,15 +15,14 @@ services:
     container_name: app
     build: 
       context: .
-      dockerfile: ./docker/dev/app.dockerfile
+      dockerfile: ./docker/prod/app.dockerfile
     restart: always
     depends_on:
       - guilded-place-db
     ports:
-      - 5555:5555
-      - 5173:5173
+      - ${PORT_BINDING:?PORT BINDING REQUIRED}
     volumes:
       - ./app:/app
     environment:
-      - DATABASE_URL=postgresql://postgres:password@db:5432/postgres
-      - JWT_SECRET=${JWT_SECRET-secret}
+      DATABASE_URL: postgresql://postgres:password@db:5432/postgres
+      JWT_SECRET: ${JWT_SECRET:?JWT SECRET REQUIRED}

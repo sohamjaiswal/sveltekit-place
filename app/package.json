@@ -3,9 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "vite dev",
+    "dev": "vite dev --host",
     "build": "vite build",
     "preview": "vite preview",
+    "start:prod": "node index.js",
     "test": "npm run test:integration && npm run test:unit",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
@@ -22,6 +23,8 @@
     "@sveltejs/kit": "^1.20.4",
     "@tailwindcss/forms": "0.5.6",
     "@tailwindcss/typography": "0.5.10",
+    "@types/express": "^4.17.18",
+    "@types/jsonwebtoken": "^9.0.3",
     "@types/node": "20.8.2",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
@@ -47,6 +50,8 @@
   "dependencies": {
     "@floating-ui/dom": "1.5.3",
     "@prisma/client": "^5.4.1",
-    "@zenstackhq/runtime": "1.0.2"
+    "@zenstackhq/runtime": "1.0.2",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2"
   }
 }
