@@ -6,7 +6,7 @@ jobs:
   build:
     defaults:
       run:
-        working-directory: ./app
+        working-directory: app
     runs-on: ubuntu-latest
     strategy:
       matrix:
