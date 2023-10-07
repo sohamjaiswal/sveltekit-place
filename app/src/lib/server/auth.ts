@@ -1,5 +1,5 @@
 import { CARDBOARD_SECRET, CARDBOARD_TOKEN, JWT_SECRET } from '$env/static/private';
-import { Cardboard, type IGetToken } from 'cardboard.js';
+import { Cardboard } from 'cardboard.js';
 import jwt from 'jsonwebtoken';
 
 if (!CARDBOARD_TOKEN) {

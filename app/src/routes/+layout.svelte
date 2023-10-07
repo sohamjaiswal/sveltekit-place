@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.postcss';
-	import { AppShell, AppBar, getDrawerStore, initializeStores, Drawer, Avatar, LightSwitch } from '@skeletonlabs/skeleton';
+	import 'iconify-icon';
+	import { getDrawerStore, initializeStores, Drawer, Avatar, LightSwitch, type DrawerSettings } from '@skeletonlabs/skeleton';
 
 	// Floating UI for Popups
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
@@ -11,17 +12,25 @@
 	initializeStores()
 	
 	const drawerStore = getDrawerStore();
+
+	const drawerSettings: DrawerSettings = {
+		width: 'w-[280px] md:w-[480px]',
+		padding: 'p-4',
+		rounded: 'rounded-none',
+	}
 </script>
 
-<Drawer position="bottom">
+<Drawer position="right">
 	<div class="flex flex-col gap-4 mt-4 items-center w-full">
-		<h2>
-			Guilded Place
-		</h2>
+		<a href="/">
+			<h2>
+				Guilded Place
+			</h2>
+		</a>
 		{#if $page.data.localUser}
 		<a href="profile" on:click={() => drawerStore.close()} >
 		<div class="flex flex-col items-center w-full">
-				<Avatar src={$page.data.localUser.avatar} width="w-16" rounded="rounded-full" />
+				<Avatar src={$page.data.localUser.avatar} width="w-16" rounded="rounded-none" />
 				{$page.data.localUser.username}
 			</div>
 		</a>
@@ -29,7 +38,7 @@
 		{/if}
 		{#if $page.data.localUser}
 		<a href="settings" on:click={() => drawerStore.close()}>
-			Account Settings
+			Settings
 		</a>
 		<hr class="w-2/3" />
 		<LightSwitch />
@@ -46,26 +55,9 @@
 	</div>
 </Drawer>
 
-<!-- App Shell -->
-<AppShell>
-	<svelte:fragment slot="header">
-		<button on:click={() => drawerStore.open()}>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				class="h-6 w-6"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M4 6h16M4 12h16m-7 6h7"
-				/>
-			</svg>
-		</button>
-	</svelte:fragment>
-	<!-- Page Route Content -->
+<div class="root-container relative h-screen w-screen">
+	<button on:click={() => drawerStore.open(drawerSettings)} class="fixed z-10 m-2">
+		<iconify-icon icon="fa-solid:bars" />
+	</button>
 	<slot />
-</AppShell>
+</div>

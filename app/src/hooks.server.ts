@@ -46,7 +46,7 @@ const auth = (async ({ event, resolve }) => {
 
     // create an enhanced PrismaClient that recognizes access policies
     event.locals.db = enhance(prisma, {
-        user: event.locals.localUser ? { id: event.locals.localUser.id } : undefined
+        user: event.locals.localUser ? { ...event.locals.localUser } : undefined
     });
 
     return resolve(event);
