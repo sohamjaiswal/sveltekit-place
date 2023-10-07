@@ -56,7 +56,7 @@
 </Drawer>
 
 <div class="root-container relative h-screen w-screen">
-	<button on:click={() => drawerStore.open(drawerSettings)} class="fixed z-10 m-2">
+	<button on:click={() => drawerStore.open(drawerSettings)} class="btn variant-filled-primary fixed bottom-3 right-3 z-20">
 		<iconify-icon icon="fa-solid:bars" />
 	</button>
 	<slot />

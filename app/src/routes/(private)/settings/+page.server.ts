@@ -53,9 +53,10 @@ export const actions = {
           description: result.data.description,
           dimX: result.data.dimx,
           dimY: result.data.dimy,
+          color: result.data.bgColor,
         }
       })
-      const {id, dimX, dimY} = newBoard
+      const {id, dimX, dimY, color} = newBoard
       const newBoardPixels = []
       for (let i = 0; i < dimX; i++) {
         for (let j = 0; j < dimY; j++) {
@@ -63,7 +64,7 @@ export const actions = {
             boardId: id,
             x: i,
             y: j,
-            color: result.data.bgColor,
+            color,
             userId: locals.localUser.id
           })
         }

@@ -1,0 +1,101 @@
+
+const canvasHeight = board.dimY * SCALEFACTOR
+    const canvasWidth = board.dimX * SCALEFACTOR
+    canvas.addEventListener('click', selectPixel)
+    const ctx = canvas.getContext('2d')
+
+    if (!ctx) {
+      console.error('Failed to get canvas context!')
+      return
+    }
+
+    canvas.height = canvasHeight
+    canvas.width = canvasWidth
+
+
+    // Function to render the Cartesian objects
+    function renderCanvas() {
+      if (!ctx) {
+        console.error('Failed to get canvas context!')
+        return
+      }
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight); // Clear the canvas
+      for (const pixel of pixels) {
+        ctx.fillStyle = pixel.color;
+        ctx.fillRect(pixel.x * SCALEFACTOR, pixel.y * SCALEFACTOR, SCALEFACTOR, SCALEFACTOR);
+        // Add a black border
+        ctx.strokeStyle = 'black';
+        ctx.strokeRect(pixel.x * SCALEFACTOR, pixel.y * SCALEFACTOR, SCALEFACTOR, SCALEFACTOR);
+        // Highlight the selected pixel (if any)
+        if (selectedPixel) {
+          ctx.strokeStyle = getRainbowColor(); // You can choose any highlight color
+          ctx.strokeRect(
+            selectedPixel.x * SCALEFACTOR,
+            selectedPixel.y * SCALEFACTOR,
+            SCALEFACTOR,
+            SCALEFACTOR
+          );
+        }
+      }
+    }
+
+    // Function to handle pixel selection on click
+    function selectPixel(event: MouseEvent) {
+      const mouseX = event.clientX - canvas.getBoundingClientRect().left;
+      const mouseY = event.clientY - canvas.getBoundingClientRect().top;
+
+      // Iterate through the pixels to check if the click is inside any pixel
+      for (const pixel of pixels) {
+        const pixelX = pixel.x * SCALEFACTOR;
+        const pixelY = pixel.y * SCALEFACTOR;
+
+        if (
+          mouseX >= pixelX &&
+          mouseX <= pixelX + SCALEFACTOR &&
+          mouseY >= pixelY &&
+          mouseY <= pixelY + SCALEFACTOR
+        ) {
+          // Unselect previously selected pixel
+          if (selectedPixel) {
+            selectedPixel = null;
+          }
+
+          // Select the clicked pixel
+          selectedPixel = pixel;
+
+          // Redraw the canvas
+          renderCanvas();
+
+          // Log the selected pixel's position
+          console.log(`Selected pixel: x=${pixel.x}, y=${pixel.y}`);
+          return;
+        }
+      }
+
+      // If no pixel was selected, unselect the previously selected one (if any)
+      if (selectedPixel) {
+        selectedPixel = null;
+        renderCanvas();
+      }
+    }
+
+
+    zoomIn = () => {
+      zoomLevel *= 1.2; // Increase zoom level (adjust the factor as needed)
+      canvas.style.transform = `scale(${zoomLevel})`;
+      renderCanvas();
+    }
+
+    // Function to handle zooming out
+    zoomOut = () => {
+      zoomLevel /= 1.2; // Decrease zoom level (adjust the factor as needed)
+      canvas.style.transform = `scale(${zoomLevel})`;
+      renderCanvas();
+    }
+
+    // Start rendering with requestAnimationFrame
+    function animate() {
+      renderCanvas();
+      requestAnimationFrame(animate);
+    }
+    animate();

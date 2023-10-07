@@ -40,11 +40,13 @@ model Board {
     editedAt DateTime @default(now())
     id String @id() @unique() @default(cuid())
     /// @length(3, 20)
-    name String
+    name String @unique()
     /// @length(3, 100)
     description String?
     dimX Int
     dimY Int
+    /// @length(7, 7)
+    color String @default("#ffffff")
     pixels Pixel[]
 }
 
@@ -57,7 +59,8 @@ model Pixel {
     boardId String
     x Int
     y Int
-    color String
+    /// @length(7, 7)
+    color String @default("#ffffff")
     user User @relation(fields: [userId], references: [id])
     userId String
 

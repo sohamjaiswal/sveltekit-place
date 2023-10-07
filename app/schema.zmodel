@@ -38,7 +38,7 @@ model User extends _base {
 
 model Board extends _base {
     id String @id @unique @default(cuid())
-    name String @length(3,20)
+    name String @unique @length(3,20)
     description String? @length(3,100)
     dimX Int 
     dimY Int

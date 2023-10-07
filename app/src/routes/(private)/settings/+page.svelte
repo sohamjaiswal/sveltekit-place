@@ -64,9 +64,17 @@ Nothing to view here right now...
     <p>
       {board.description}
     </p>
+    <div class="flex gap-4">
     <p>
       {board.dimX} x {board.dimY}
     </p>
+    ·
+      <p>
+        {board.color}
+        <!-- preview board color -->
+      </p>
+      <div class="w-10 h-10" style="background-color: {board.color}"></div>
+    </div>
     <div class="flex gap-4">
     <a href="board/{board.id}">
         <button class="btn variant-filled">
