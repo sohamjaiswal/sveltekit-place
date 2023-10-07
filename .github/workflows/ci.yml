@@ -8,10 +8,16 @@ jobs:
       run:
         working-directory: app
     runs-on: ubuntu-latest
-    environment: Dev
     strategy:
       matrix:
         node-version: [20.x]
+    env:
+      CARDBOARD_SECRET: ${{ secrets.CARDBOARD_SECRET }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      JWT_SECRET: ${{secrets.JWT_SECRET}}
+      CARDBOARD_TOKEN: ${{vars.CARDBOARD_TOKEN}}
+      PORT_BINDING: ${{vars.PORT_BINDING}}
+      PUBLIC_CARDBOARD_URL: ${{vars.PUBLIC_CARDBOARD_URL}}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
