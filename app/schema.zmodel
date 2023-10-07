@@ -1,10 +1,6 @@
 // This is a sample model to get you started.
 // Learn how to model you app: https://zenstack.dev/#/modeling-your-app.
 
-/**
- * A sample data source using local sqlite db.
- * See how to use a different db: https://zenstack.dev/#/zmodel-data-source.
- */
 datasource db {
     provider = "postgresql"
     url = env("DATABASE_URL")
@@ -20,18 +16,48 @@ abstract model _base {
     editedAt DateTime @default(now())
 }
 
-/**
- * User model
- */
+enum Role {
+    USER
+    ADMIN
+}
+
 model User extends _base {
     id String @id @unique
     username String 
-    avatar String @default("/poop.png")
+    avatar String @default("https://i.pinimg.com/736x/4f/09/97/4f0997ce37fd4dd022fbb3c09083dbb4.jpg")
     banner String @default("https://img.guildedcdn.com/asset/Default/ProfileBannerLarge.png")
+    pixels Pixel[]
+    totalPixelsChanged Int @default(0)
+    role Role @default(USER)
      // everybody can signup
     @@allow('create,read', true)
 
     // full access by self
     @@allow('all', auth() == this)
+}
+
+model Board extends _base {
+    id String @id @unique @default(cuid())
+    name String @length(3,20)
+    description String? @length(3,100)
+    dimX Int 
+    dimY Int
+    color String @default("#ffffff") @length(7,7)
+    pixels Pixel[]
+    @@allow('read', true)
+    @@allow('create,update,delete', auth().role == "ADMIN")
+}
+
+model Pixel extends _base {
+    board Board @relation(fields: [boardId], references: [id])
+    boardId String
+    x Int
+    y Int 
+    color String @default("#ffffff") @length(7,7)
+    user User @relation(fields: [userId], references: [id])
+    userId String
+    @@allow('read,update', true)
+    @@allow('create,delete', auth().role == "ADMIN")
+    @@unique ([boardId, x, y], name: "PixelIdentifier")
 }
 
