@@ -275,22 +275,6 @@
   }
 
   @keyframes rainbow-border {
-      /* 0% {
-          border-image: linear-gradient(45deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
-          border-image-slice: 1;
-      }
-      33% {
-          border-image: linear-gradient(45deg, #f79533, #f37055, #ef4e7b, #5073b8, #a166ab, #1098ad, #07b39b, #6fba82);
-          border-image-slice: 1;
-      }
-      66% {
-          border-image: linear-gradient(45deg, #f79533, #07b39b, #1098ad, #5073b8, #a166ab, #ef4e7b, #f37055, #6fba82);
-          border-image-slice: 1;
-      }
-      100% {
-          border-image: linear-gradient(45deg, #6fba82, #07b39b, #1098ad, #5073b8, #a166ab, #ef4e7b, #f37055, #f79533);
-          border-image-slice: 1;
-      } */
       0% {
           border-image: linear-gradient(45deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
           border-image-slice: 1;
@@ -324,7 +308,6 @@
           border-image-slice: 1;
       }
   }
-
   .highlight {
       width: 40px;
       height: 40px;
