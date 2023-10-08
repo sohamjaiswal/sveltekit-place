@@ -18,6 +18,7 @@ jobs:
       CARDBOARD_TOKEN: ${{vars.CARDBOARD_TOKEN}}
       PORT_BINDING: ${{vars.PORT_BINDING}}
       PUBLIC_CARDBOARD_URL: ${{vars.PUBLIC_CARDBOARD_URL}}
+      PUBLIC_CURRENT_BOARD: ${{vars.PUBLIC_CURRENT_BOARD}}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
