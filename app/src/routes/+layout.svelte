@@ -31,7 +31,13 @@
 		<a href="profile" on:click={() => drawerStore.close()} >
 		<div class="flex flex-col items-center w-full">
 				<Avatar src={$page.data.localUser.avatar} width="w-16" rounded="rounded-none" />
-				{$page.data.localUser.username}
+				<div class="flex gap-2 items-center mt-2">
+					{$page.data.localUser.username}
+					·
+					{#if $page.data.localUser.role == "ADMIN"}
+					<span class="badge variant-filled-tertiary">ADMIN</span>
+					{/if}
+				</div>
 			</div>
 		</a>
 		<hr class="w-2/3" />

@@ -1,10 +1,16 @@
+import {PUBLIC_CURRENT_BOARD} from '$env/static/public'
+import { error } from '@sveltejs/kit'
+
 export const load = async ({locals}) => {
+  if (PUBLIC_CURRENT_BOARD == '') {
+    throw error(500, "No board selected")
+  }
   // get pixels
   const getPixels = async () => {
     return await locals.db.pixel.findMany({
       where: {
         board: {
-          name: "main"
+          name: PUBLIC_CURRENT_BOARD
         }
       },
       select: {

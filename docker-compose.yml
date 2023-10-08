@@ -30,3 +30,4 @@ services:
       - CARDBOARD_TOKEN=${CARDBOARD_TOKEN:?Get token at https://cardboard.ink/}
       - CARDBOARD_SECRET=${CARDBOARD_SECRET:?Get secret at https://cardboard.ink/}
       - PUBLIC_CARDBOARD_URL=${PUBLIC_CARDBOARD_URL:?Get url at https://cardboard.ink/}
+      - PUBLIC_CURRENT_BOARD=${PUBLIC_CURRENT_BOARD?Board Param is required, set to empty string if none yet.}

@@ -4652,6 +4652,11 @@ svelte@^4.0.5:
     magic-string "^0.30.0"
     periscopic "^3.1.0"
 
+sveltekit-sse@^0.3.3:
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/sveltekit-sse/-/sveltekit-sse-0.3.3.tgz#a79aad347bb0514e7f501d879ad0181a051fb6ee"
+  integrity sha512-ZR/hPw6Cld/toY95w9gOU6dmO62WXdYQU0LYNw5WRS2RoqoblG9iSpZ4qVxocrtqfWc7Dw8qv2BkpA5sDFK+dQ==
+
 tailwindcss@3.3.3:
   version "3.3.3"
   resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-3.3.3.tgz#90da807393a2859189e48e9e7000e6880a736daf"

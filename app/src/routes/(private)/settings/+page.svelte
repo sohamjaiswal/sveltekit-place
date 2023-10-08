@@ -2,6 +2,7 @@
 
 	import { enhance } from "$app/forms";
 	import { page } from "$app/stores";
+	import { PUBLIC_CURRENT_BOARD } from "$env/static/public";
 
   export let data
   const {boards} = data 
@@ -57,7 +58,7 @@ Nothing to view here right now...
 {#if boards.length != 0}
 <div class="flex flex-col gap-4">
   {#each boards as board}
-  <div class="card card-hover p-2 flex flex-col gap-4">
+  <div class="card card-hover p-2 flex flex-col gap-4" class:variant-filled-success={board.name == PUBLIC_CURRENT_BOARD}>
     <h2>
       {board.name}
     </h2>
