@@ -81,7 +81,7 @@
   onMount(async () => {
     selPlacer = getSelPlacer()
     const board = await lazy.board
-    let pixels = sortPixels(await lazy.pixels)
+    let pixels = await lazy.pixels
     if (!board || !pixels) {
       console.error("Failed to load board/pixels!")
       return
@@ -128,6 +128,13 @@
     // helper function to update canvas with passed in pixels
     const updateCanvas = (pixels: Pick<Pixel, "x" | "y" | "color">[],newPixels: Pick<Pixel, "x" | "y" | "color">[] = []): Pick<Pixel, "x" | "y" | "color">[] => {
       if (newPixels.length === 0) {
+        const sortedPixels = sortPixels(pixels); // Define the sorting logic
+        const updatedImageData = createImageData(sortedPixels);
+        if (!updatedImageData) {
+          console.error("Failed to create ImageData!");
+          return pixels; // Return null to indicate failure
+        }
+        ctx.putImageData(updatedImageData, 0, 0);
         return pixels; // Nothing to update, return the original pixels
       }
       const updatedPixels = pixels.filter((pixel) => {
@@ -135,6 +142,7 @@
           (newPixel) => pixel.x === newPixel.x && pixel.y === newPixel.y
         );
       });
+      console.log(pixels, newPixels, updatedPixels)
       // Push all elements from newPixels into updatedPixels
       updatedPixels.push(...newPixels);
       const sortedPixels = sortPixels(updatedPixels); // Define the sorting logic
@@ -156,7 +164,7 @@
         console.error(err)
       }
     })
-    updateCanvas(pixels)
+    updateCanvas(pixels, [])
     updateHighlighter()
   })
 </script>
