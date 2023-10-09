@@ -1,3 +1,4 @@
+import { PROD } from '$env/static/private';
 import { cb, createToken } from '$lib/server';
 import { redirect } from '@sveltejs/kit';
 export const load = async ({ url, cookies }) => {
@@ -16,7 +17,8 @@ export const load = async ({ url, cookies }) => {
 		path: '/',
 		expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
 		httpOnly: true,
-		sameSite: 'lax'
+		sameSite: PROD === 'true' ? 'none' : 'lax',
+    secure: PROD === 'true',
 	});
 
 	throw redirect(302, '/');

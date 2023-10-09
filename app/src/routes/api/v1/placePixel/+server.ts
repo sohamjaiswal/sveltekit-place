@@ -2,7 +2,7 @@ import { error, json } from '@sveltejs/kit'
 import { PUBLIC_CURRENT_BOARD } from '$env/static/public';
 import type { Pixel } from '@prisma/client';
 import {z} from 'zod'
-import { pixelUpdates } from '$lib/server/globals.js';
+import { pixelUpdatesManager } from '$lib/common';
 
 export const POST = async ({locals, request}) => {
   if (PUBLIC_CURRENT_BOARD == '') {
@@ -55,12 +55,7 @@ export const POST = async ({locals, request}) => {
 
   const pushEl = {x: updatedPixel.x, y: updatedPixel.y, color: updatedPixel.color}
 
-  pixelUpdates.push(pushEl)
-
-  // remove first element if too long
-  if (pixelUpdates.length > 100) {
-    pixelUpdates.shift()
-  }
+  pixelUpdatesManager.addPixelUpdate([pushEl])
 
   return json(updatedPixel)
 }

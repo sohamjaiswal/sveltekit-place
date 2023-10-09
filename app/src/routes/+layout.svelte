@@ -33,8 +33,8 @@
 				<Avatar src={$page.data.localUser.avatar} width="w-16" rounded="rounded-none" />
 				<div class="flex gap-2 items-center mt-2">
 					{$page.data.localUser.username}
-					·
 					{#if $page.data.localUser.role == "ADMIN"}
+					·
 					<span class="badge variant-filled-tertiary">ADMIN</span>
 					{/if}
 				</div>

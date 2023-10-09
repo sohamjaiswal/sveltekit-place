@@ -18,6 +18,9 @@ export const load = async ({locals}) => {
         y: true,
         color: true
       }
+    }).catch((e) => {
+      console.error(e)
+      throw error(500, "Error while fetching pixels")
     })
   }
   const getBoard = async () => {
@@ -25,6 +28,8 @@ export const load = async ({locals}) => {
       where: {
         name: "main"
       }
+    }).catch(() => {
+      throw error(500, "Board hasn't been set, contact admin.")
     })
   }
   return {lazy: {

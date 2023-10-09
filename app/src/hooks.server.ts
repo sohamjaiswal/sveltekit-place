@@ -1,4 +1,4 @@
-import { JWT_SECRET } from '$env/static/private';
+import { JWT_SECRET, PROD } from '$env/static/private';
 import { cb, prisma } from '$lib/server';
 import type { Handle } from '@sveltejs/kit';
 import { enhance } from '@zenstackhq/runtime';
@@ -13,7 +13,9 @@ const auth = (async ({ event, resolve }) => {
             if (!user || !user.id || user.id == '') {
               event.cookies.set('session', '', {
                 path: '/',
-                expires: new Date(0)
+                expires: new Date(0),
+                sameSite: PROD === 'true' ? 'none' : 'lax',
+                secure: PROD === 'true'
               });
               return resolve(event);
             }
@@ -34,6 +36,19 @@ const auth = (async ({ event, resolve }) => {
                     }
                   })
                 } 
+                // update local user if remote user changed
+                if (localUser.username != user.name || localUser.avatar != user.avatar || localUser.banner != user.banner) {
+                  localUser = await prisma.user.update({
+                    where:{
+                      id: user.id
+                    },
+                    data:{
+                      username: user.name,
+                      avatar: user.avatar,
+                      banner: user.banner,
+                    }
+                  })
+                }
                 event.locals.localUser = localUser;
             } else {
                 console.warn('User not found:', decoded.sub);

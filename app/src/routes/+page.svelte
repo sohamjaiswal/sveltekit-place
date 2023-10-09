@@ -1,24 +1,83 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { hexToRgb } from '$lib/common';
+	import { getColorsFromImage, hexToRgb, rgbToHex, type UserPresence } from '$lib/common';
 	import type { Pixel, User } from '@prisma/client';
-	import { Avatar } from '@skeletonlabs/skeleton';
+	import { Avatar } from '@skeletonlabs/skeleton';;
 	import { onMount } from 'svelte';
   import { source } from 'sveltekit-sse'
-
   const connection = source('api/v1/events')
   const pixelUpdates = connection.select('pixel-updates')
-
+  const presenceUpdates = connection.select('user-presence')
   export let data;
   const {lazy} = data
-
   let canvas: HTMLCanvasElement
   let highlighter: HTMLDivElement
-
+  let highlighterColorManager = new Map<string, string[]>()
+  const setHighlighterColor = (element: HTMLElement, imageURL: string) => {
+    const currColor = highlighterColorManager.get(imageURL)
+    if (currColor) {
+      element.style.borderColor = currColor[0]
+      element.style.color = currColor[1]
+    }
+    getColorsFromImage(imageURL).then((colors) => {
+      if (!colors) {
+        element.style.borderColor = "#000000"
+        element.style.color = "#ffffff"
+        return
+      }
+      highlighterColorManager.set(imageURL, colors)
+      element.style.borderColor = colors[0]
+      element.style.color = colors[1]
+    })
+  } 
+  const setHighlighterContext = (element: HTMLElement, imageURL: string) => {
+    const currColor = highlighterColorManager.get(imageURL)
+    if (currColor) {
+      element.style.backgroundColor = currColor[0]
+    }
+    getColorsFromImage(imageURL).then((colors) => {
+      if (!colors) {
+        element.style.backgroundColor = "#000000"
+        return
+      }
+      highlighterColorManager.set(imageURL, colors)
+      element.style.backgroundColor = colors[0]
+    })
+  }
   async function getSelPlacer (x: number = 0, y: number = 0) {
     return (await fetch(`/api/v1/getPlacer?x=${x}&y=${y}`)).json() as Promise<User>
   }
-
+  async function setPresence (x: number, y: number){
+    // check if color is valid hex
+    if (!color.match(/^#[0-9A-F]{6}$/i)) {
+      console.error("Invalid color!")
+      return
+    }
+    await fetch(`/api/v1/updatePresence`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        x: x,
+        y: y
+      })
+    }).catch((err) => {
+      console.error(err)
+    })
+  }
+  $: zoom = false
+  let selectedX: number | null = null
+  let selectedY: number | null = null
+  let selectedPlacer: Promise<User>  | null = null
+  let color = "#ffffff"
+  let preZoomX = 0
+  let preZoomY = 0
+  let extPresence: UserPresence[] = []
+  $: selX = selectedX
+  $: selY = selectedY
+  $: selPlacer = selectedPlacer
+  $: userPresence = extPresence
   const placePixel = async() => {
       await fetch(`/api/v1/placePixel`, {
         method: "POST",
@@ -34,40 +93,7 @@
         console.error(err)
       })
     }
-
-  $: zoom = false
-  let selectedX: number | null = null
-  let selectedY: number | null = null
-  let selectedPlacer: Promise<User>  | null = null
-  let color = "#ffffff"
-  let preZoomX = 0
-  let preZoomY = 0
-  $: selX = selectedX
-  $: selY = selectedY
-  $: selPlacer = selectedPlacer
-  async function updateHighlighter() {
-    if (selX == null || selY == null || !zoom) {
-      highlighter.classList.add('hidden')
-      return
-    }
-    highlighter.style.left = `${40*selX}px`; // Adjust the size and position as needed
-    highlighter.style.top = `${40*selY}px`; // Adjust the size and position as needed
-    highlighter.classList.remove('hidden')
-    selPlacer = getSelPlacer(selX, selY)
-  }
-
-  function handleZoomClick() {
-    const isZoomed = !zoom
-    if (isZoomed) {
-      selX = preZoomX
-      selY = preZoomY
-      return
-    }
-    selX = null
-    selY = null
-    updateHighlighter()
-  }
-
+  let handleZoomClick = () => {}
   const sortPixels = (pixels: Pick<Pixel, "x"|"y"|"color">[]) => {
     const sorted =  pixels.sort((a,b) => {
       if (a.y == b.y) {
@@ -79,6 +105,47 @@
   }
 
   onMount(async () => {
+    const highlighters = document.getElementsByClassName('highlight')
+        for (let i = 0; i < highlighters.length; i++) {
+          highlighters[i].remove()
+        }
+    if ($page.data.localUser) {
+      console.log(await getColorsFromImage($page.data.localUser.avatar))
+    }
+    async function updateHighlighter() {
+      const highlighters = document.getElementsByClassName('highlight')
+      if (selX == null || selY == null || !zoom) {
+        highlighter.classList.add('hidden')
+        return
+      }
+      highlighter.style.left = `${40*selX}px`; // Adjust the size and position as needed
+      highlighter.style.top = `${40*selY}px`; // Adjust the size and position as needed
+      highlighter.classList.remove('hidden')
+      selPlacer = getSelPlacer(selX, selY)
+      if ($page.data.localUser) {
+        setPresence(selX, selY)
+      }
+
+    }
+    handleZoomClick = () => {
+      const highlighters = document.querySelectorAll('highlight') as NodeListOf<HTMLElement>
+      const isZoomed = !zoom
+      console.log(isZoomed)
+      if (isZoomed) {
+        selX = preZoomX
+        selY = preZoomY
+        for (let i = 0; i < highlighters.length; i++) {
+            highlighters[i].style.display = "visible"
+            }
+        return
+      }
+      selX = null
+      selY = null
+      for (let i = 0; i < highlighters.length; i++) {
+            highlighters[i].style.display = "hidden"
+          }
+      updateHighlighter()
+    }
     selPlacer = getSelPlacer()
     const board = await lazy.board
     let pixels = await lazy.pixels
@@ -96,7 +163,7 @@
     ctx.imageSmoothingEnabled = false;
     ctx.imageSmoothingQuality = "low";
         // Add an event listener to the canvas for mouse clicks
-    canvas.addEventListener('click', (event) => {
+    canvas.addEventListener('click', (event: MouseEvent) => {
       // Get the mouse click coordinates relative to the canvas
       const x = event.offsetX;
       const y = event.offsetY;
@@ -142,7 +209,6 @@
           (newPixel) => pixel.x === newPixel.x && pixel.y === newPixel.y
         );
       });
-      console.log(pixels, newPixels, updatedPixels)
       // Push all elements from newPixels into updatedPixels
       updatedPixels.push(...newPixels);
       const sortedPixels = sortPixels(updatedPixels); // Define the sorting logic
@@ -156,10 +222,26 @@
     };
     pixelUpdates.subscribe((lastPixelUpdates) => {
       try {
-        console.log(lastPixelUpdates)
-        console.log(JSON.parse(lastPixelUpdates))
+        if (lastPixelUpdates == '') {
+          return
+        }
         const updates = (JSON.parse(lastPixelUpdates)).pixelUpdates as Pick<Pixel, "x"|"y"|"color">[]
         pixels = updateCanvas(pixels, updates)
+      } catch (err) {
+        console.error(err)
+      }
+    })
+    presenceUpdates.subscribe((presenceUpdate) => {
+      try {
+        if (presenceUpdate == '') {
+          return
+        }
+        const update = (JSON.parse(presenceUpdate)).userPresence as UserPresence[]
+        // remove own user from list, keep others
+        const updateBarSelf = update.filter((presence) => {
+          return presence.user.id != $page.data.localUser?.id
+        })
+        userPresence = updateBarSelf
       } catch (err) {
         console.error(err)
       }
@@ -183,7 +265,7 @@
     </h1>
     <iconify-icon icon="eos-icons:spinner" class="animate-spin" />
   </div>
-  {:then}
+  {:then board}
   {#await lazy.pixels}
   <div class="flex justify-center items-center text-center w-full h-full">
     <h1>
@@ -193,11 +275,26 @@
   </div>
   {:then pixels}
   <!-- make a screen size scrollable and zoomable canvas element where user will be able to select the pixel -->
-  <div class="canvas-container">
+  <div class="canvas-container" id="canvas-container">
     <input type="hidden" name="X" value={selX} />
     <input type="hidden" name="Y" value={selY} />
     <canvas bind:this={canvas} class:zoom={zoom} />
-    <div class="highlight absolute h-10 w-10 stroke-black" bind:this={highlighter} />
+    <div class="absolute">
+      {#key userPresence}
+      {#each userPresence as presence}
+        <div class={`highlight absolute h-10 w-10 stroke-black ${!zoom ? "hidden" : "block"}`} style="left: {40*presence.x}px; top: {40*presence.y - (board?.dimY ?? 0)}px" use:setHighlighterColor={presence.user.avatar}>
+          <div style="top: 37px; left: -3px;" class="absolute flex justify-between items-center gap-2 p-1" use:setHighlighterColor={presence.user.avatar} use:setHighlighterContext={presence.user.avatar}>
+            <Avatar src={presence.user.avatar} width="w-8" rounded="rounded-none" />
+            <p>
+              ·
+            </p>
+            {presence.user.username}
+          </div>
+        </div>
+      {/each}
+      {/key}
+    </div>
+    <div class="highlight-own absolute h-10 w-10 stroke-black" bind:this={highlighter} />
   </div>
   {:catch}
   <p class="flex justify-center items-center text-center w-full h-full text-error-500">
@@ -236,10 +333,16 @@
           {#if placer}
             <div class="flex items-center justify-center gap-2">
               ·
-              <Avatar src={placer.avatar} width="w-8" rounded="rounded-none" />
-              {placer.username}
-              {#if placer.id == $page.data.localUser.id}
-              <span class="badge variant-filled-secondary">YOU</span>
+              <a href={`http://guilded.gg/profile/${placer.id}`} target="_blank" class="inline">
+                <div class="flex items-center gap-2">
+                  <Avatar src={placer.avatar} width="w-8" rounded="rounded-none" />
+                  {placer.username}
+                </div>
+              </a>
+              {#if $page.data.localUser}
+                {#if placer.id == $page.data.localUser.id}
+                  <span class="badge variant-filled-secondary">YOU</span>
+                {/if}
               {/if}
               {#if placer.role == "ADMIN"}
               <span class="badge variant-filled-tertiary">ADMIN</span>
@@ -311,9 +414,13 @@
   .highlight {
       width: 40px;
       height: 40px;
-      border: 3px solid transparent;
-      /* border-image: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet);
-      border-image-slice: 1; */
-      animation: 1.5s rainbow-border infinite linear;
+      border: 3px solid black;
+      position: relative;
+  }
+  .highlight-own {
+    width: 40px;
+    height: 40px;
+    border: 3px solid transparent;
+    animation: 1.5s rainbow-border infinite alternate;
   }
 </style>
