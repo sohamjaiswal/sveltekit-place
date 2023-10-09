@@ -12,7 +12,6 @@
   export let data;
   const {lazy, board} = data
   let canvas: HTMLCanvasElement
-  let highlighter: HTMLDivElement
   let highlighterColorManager = new Map<string, string[]>()
   const setHighlighterColor = (element: HTMLElement, imageURL: string) => {
     const currColor = highlighterColorManager.get(imageURL)
@@ -266,7 +265,7 @@
     </div>
     {#key zoom}
     {#if selX != null && selY != null}
-    <div class={`highlight-own absolute h-10 w-10 stroke-black ${zoom ? "block" : "hidden"}`} style={`top: ${40*selY}px; left: ${40*selX}px;`} bind:this={highlighter} />
+    <div class={`highlight-own absolute h-10 w-10 stroke-black ${zoom ? "block" : "hidden"}`} style={`top: ${40*selY}px; left: ${40*selX}px;`} />
     {/if}
     {/key}
   </div>
