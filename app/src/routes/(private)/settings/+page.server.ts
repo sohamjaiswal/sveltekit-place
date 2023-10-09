@@ -1,6 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit'
 import {zfd} from 'zod-form-data'
 import {z} from 'zod'
+import { redis } from '$lib/server/redis'
 
 export const load = ({locals}) => {
   if (!locals.localUser) {
@@ -29,7 +30,6 @@ export const actions = {
       throw redirect(302, '/login')
     }
     const formData = await request.formData()
-    console.log(formData)
     const createBoardSchema = zfd.formData({
       name: zfd.text(z.string().min(3).max(20)),
       description: zfd.text(z.string().min(3).max(100).optional()),
@@ -45,7 +45,6 @@ export const actions = {
       }
       return fail(400, data)
     }
-    console.log(result.data)
     try {
       const newBoard = await locals.db.board.create({
         data: {
@@ -72,7 +71,6 @@ export const actions = {
       await locals.db.pixel.createMany({
         data: newBoardPixels
       })
-      console.log('board created')
     } catch (e) {
       console.error(e)
       return fail(403, {error: `${e}`})
@@ -92,13 +90,16 @@ export const actions = {
       }
       return fail(400, data)
     }
-    console.log(result.data)
     try {
       await locals.db.pixel.deleteMany({
         where: {
           boardId: result.data.id
         }
       })
+
+      // delete pixels from redis
+      await redis.del('pixels')
+
       await locals.db.board.delete({
         where: {
           id: result.data.id
@@ -108,6 +109,7 @@ export const actions = {
       console.error(e)
       return fail(403, {error: `${e}`})
     }
+
     throw redirect(303, '/settings')
   }
 }

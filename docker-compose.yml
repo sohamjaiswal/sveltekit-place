@@ -1,16 +1,28 @@
 version: "3.3"
 
 services:
+  guilded-place-redis:
+    container_name: redis
+    image: redis:7.2.1-alpine
+    restart: always
+    ports:
+      - ${REDIS_PORT-6379}:${REDIS_PORT-6379}
+    volumes:
+      - ./redis:/data
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD-password}
+      - REDIS_PORT=${REDIS_PORT-6379}
   guilded-place-db:
     container_name: db
     image: postgres:16-alpine
     restart: always
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD-password}
+      POSTGRES_PORT: ${DB_PORT-5432}
     volumes:
       - ./db:/var/lib/postgresql/data
     ports:
-      - 5432:5432
+      - ${DB_PORT-5432}:${DB_PORT-5432}
   guilded-place-app:
     container_name: app
     build: 
@@ -25,10 +37,11 @@ services:
     volumes:
       - ./app:/app
     environment:
-      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD-password}@db:5432/postgres
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD-password}@db:${DB_PORT-5432}/postgres
       - JWT_SECRET=${JWT_SECRET-secret}
       - CARDBOARD_TOKEN=${CARDBOARD_TOKEN:?Get token at https://cardboard.ink/}
       - CARDBOARD_SECRET=${CARDBOARD_SECRET:?Get secret at https://cardboard.ink/}
       - PUBLIC_CARDBOARD_URL=${PUBLIC_CARDBOARD_URL:?Get url at https://cardboard.ink/}
       - PUBLIC_CURRENT_BOARD=${PUBLIC_CURRENT_BOARD?Board Param is required, set to empty string if none yet.}
       - PROD=${PROD-false}
+      - REDIS_URL=redis://default:${REDIS_PASSWORD-password}@redis:${REDIS_PORT-6379}/0

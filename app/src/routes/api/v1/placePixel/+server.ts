@@ -3,6 +3,7 @@ import { PUBLIC_CURRENT_BOARD } from '$env/static/public';
 import type { Pixel } from '@prisma/client';
 import {z} from 'zod'
 import { pixelUpdatesManager } from '$lib/common';
+import { redis } from '$lib/server/redis.js';
 
 export const POST = async ({locals, request}) => {
   if (PUBLIC_CURRENT_BOARD == '') {
@@ -56,6 +57,23 @@ export const POST = async ({locals, request}) => {
   const pushEl = {x: updatedPixel.x, y: updatedPixel.y, color: updatedPixel.color}
 
   pixelUpdatesManager.addPixelUpdate([pushEl])
+
+  // asynchronously update pixel cache in redis
+  const updateCache = async() => {
+    const pixelCache = await redis.get('pixels')
+    if (!pixelCache) {
+      return
+    }
+    const pixels = JSON.parse(pixelCache) as unknown as Pick<Pixel, "x"|"y"|"color">[]
+    const pixelIndex = pixels.findIndex((pixel) => pixel.x == x && pixel.y == y)
+    if (pixelIndex == -1) {
+      return
+    }
+    pixels[pixelIndex] = pushEl
+    redis.set('pixels', JSON.stringify(pixels))
+  }
+
+  updateCache()
 
   return json(updatedPixel)
 }

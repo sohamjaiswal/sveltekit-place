@@ -1,13 +1,17 @@
 import {PUBLIC_CURRENT_BOARD} from '$env/static/public'
+import { redis } from '$lib/server/redis'
 import { error } from '@sveltejs/kit'
 
 export const load = async ({locals}) => {
   if (PUBLIC_CURRENT_BOARD == '') {
     throw error(500, "No board selected")
   }
-  // get pixels
   const getPixels = async () => {
-    return await locals.db.pixel.findMany({
+    const cachedPixels = await redis.get('pixels')
+    if (cachedPixels) {
+      return JSON.parse(cachedPixels)
+    }
+    const pixels = await locals.db.pixel.findMany({
       where: {
         board: {
           name: PUBLIC_CURRENT_BOARD
@@ -22,18 +26,24 @@ export const load = async ({locals}) => {
       console.error(e)
       throw error(500, "Error while fetching pixels")
     })
+    redis.set('pixels', JSON.stringify(pixels))
+    return pixels
   }
   const getBoard = async () => {
-    return await locals.db.board.findUnique({
+    const board = await locals.db.board.findUnique({
       where: {
         name: "main"
       }
-    }).catch(() => {
-      throw error(500, "Board hasn't been set, contact admin.")
     })
+    if (!board) {
+      throw error(500, "Board hasn't been set, contact admin.")
+    }
+    return board
   }
-  return {lazy: {
-    pixels: getPixels(),
-    board: getBoard()
-  }}
+  return {
+    board: getBoard(), 
+    lazy: {
+      pixels: getPixels(),
+    }
+  }
 }

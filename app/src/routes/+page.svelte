@@ -3,13 +3,14 @@
 	import { getColorsFromImage, hexToRgb, rgbToHex, type UserPresence } from '$lib/common';
 	import type { Pixel, User } from '@prisma/client';
 	import { Avatar } from '@skeletonlabs/skeleton';;
+	import { error } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
   import { source } from 'sveltekit-sse'
   const connection = source('api/v1/events')
   const pixelUpdates = connection.select('pixel-updates')
   const presenceUpdates = connection.select('user-presence')
   export let data;
-  const {lazy} = data
+  const {lazy, board} = data
   let canvas: HTMLCanvasElement
   let highlighter: HTMLDivElement
   let highlighterColorManager = new Map<string, string[]>()
@@ -105,53 +106,24 @@
   }
 
   onMount(async () => {
-    const highlighters = document.getElementsByClassName('highlight')
-        for (let i = 0; i < highlighters.length; i++) {
-          highlighters[i].remove()
-        }
     if ($page.data.localUser) {
       console.log(await getColorsFromImage($page.data.localUser.avatar))
     }
-    async function updateHighlighter() {
-      const highlighters = document.getElementsByClassName('highlight')
-      if (selX == null || selY == null || !zoom) {
-        highlighter.classList.add('hidden')
-        return
-      }
-      highlighter.style.left = `${40*selX}px`; // Adjust the size and position as needed
-      highlighter.style.top = `${40*selY}px`; // Adjust the size and position as needed
-      highlighter.classList.remove('hidden')
-      selPlacer = getSelPlacer(selX, selY)
-      if ($page.data.localUser) {
-        setPresence(selX, selY)
-      }
-
-    }
     handleZoomClick = () => {
-      const highlighters = document.querySelectorAll('highlight') as NodeListOf<HTMLElement>
       const isZoomed = !zoom
       console.log(isZoomed)
       if (isZoomed) {
         selX = preZoomX
         selY = preZoomY
-        for (let i = 0; i < highlighters.length; i++) {
-            highlighters[i].style.display = "visible"
-            }
         return
       }
       selX = null
       selY = null
-      for (let i = 0; i < highlighters.length; i++) {
-            highlighters[i].style.display = "hidden"
-          }
-      updateHighlighter()
     }
     selPlacer = getSelPlacer()
-    const board = await lazy.board
     let pixels = await lazy.pixels
     if (!board || !pixels) {
-      console.error("Failed to load board/pixels!")
-      return
+      throw error(500, "Failed to load board/pixels!")
     }
     const ctx = canvas.getContext('2d')
     if (!ctx) {
@@ -170,9 +142,16 @@
       // Console log the x and y pixel values
       preZoomX = x
       preZoomY = y
-      selX = x
-      selY = y
-      updateHighlighter()
+      if (zoom) {
+        selX = x
+        selY = y
+      }
+      if (selX !== null && selY !== null) {
+        selPlacer = getSelPlacer(selX, selY)
+        if ($page.data.localUser) {
+          setPresence(selX, selY)
+        }
+      }
     });
     // Function to convert the pixel array into ImageData
     function createImageData(pixels: Pick<Pixel, "x"|"y"|"color">[]) {
@@ -247,7 +226,6 @@
       }
     })
     updateCanvas(pixels, [])
-    updateHighlighter()
   })
 </script>
 
@@ -258,14 +236,6 @@
 {/if}
 
 <form class="h-screen w-screen flex flex-col" on:submit={() => placePixel()}>
-  {#await lazy.board}
-  <div class="flex justify-center items-center text-center w-full h-full">
-    <h1>
-      Loading Board...
-    </h1>
-    <iconify-icon icon="eos-icons:spinner" class="animate-spin" />
-  </div>
-  {:then board}
   {#await lazy.pixels}
   <div class="flex justify-center items-center text-center w-full h-full">
     <h1>
@@ -294,16 +264,15 @@
       {/each}
       {/key}
     </div>
-    <div class="highlight-own absolute h-10 w-10 stroke-black" bind:this={highlighter} />
+    {#key zoom}
+    {#if selX != null && selY != null}
+    <div class={`highlight-own absolute h-10 w-10 stroke-black ${zoom ? "block" : "hidden"}`} style={`top: ${40*selY}px; left: ${40*selX}px;`} bind:this={highlighter} />
+    {/if}
+    {/key}
   </div>
   {:catch}
   <p class="flex justify-center items-center text-center w-full h-full text-error-500">
     Failed to load pixels!
-  </p>
-  {/await}
-  {:catch}
-  <p class="flex justify-center items-center text-center w-full h-full text-error-500">
-    Failed to load board!
   </p>
   {/await}
   <!-- color picker and submit button aligned to bottom left -->
