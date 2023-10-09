@@ -20,6 +20,7 @@ jobs:
       PUBLIC_CARDBOARD_URL: ${{vars.PUBLIC_CARDBOARD_URL}}
       PUBLIC_CURRENT_BOARD: ${{vars.PUBLIC_CURRENT_BOARD}}
       PROD: ${{vars.PROD}}
+      REDIS_URL: ${{secrets.REDIS_URL}}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
