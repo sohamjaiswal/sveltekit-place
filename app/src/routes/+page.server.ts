@@ -26,7 +26,7 @@ export const load = async ({locals}) => {
       console.error(e)
       throw error(500, "Error while fetching pixels")
     })
-    redis.set('pixels', JSON.stringify(pixels))
+    redis.set('pixels', JSON.stringify(pixels), 'EX', 150)
     return pixels
   }
   const getBoard = async () => {

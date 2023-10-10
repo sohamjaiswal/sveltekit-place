@@ -59,7 +59,6 @@
         y: y
       })
     })
-    console.log(res)
     switch (res.status) {
       case 400||404:
         toastStore.trigger({
@@ -108,7 +107,6 @@
           color: color
         })
       })
-      console.log(placed)
       switch (placed.status) {
         case 400:
           toastStore.trigger({
@@ -145,12 +143,8 @@
   }
 
   onMount(async () => {
-    if ($page.data.localUser) {
-      console.log(await getColorsFromImage($page.data.localUser.avatar))
-    }
     handleZoomClick = () => {
       const isZoomed = !zoom
-      console.log(isZoomed)
       if (isZoomed) {
         selX = preZoomX
         selY = preZoomY
