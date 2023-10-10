@@ -12,9 +12,8 @@
   export let data;
   const {lazy, board} = data
   const toastStore = getToastStore();
-  let canvas: HTMLCanvasElement
   let highlighterColorManager = new Map<string, string[]>()
-  const setHighlighterColor = (element: HTMLElement, imageURL: string) => {
+  const setHighlighterColor = (element: HTMLDivElement, imageURL: string) => {
     const currColor = highlighterColorManager.get(imageURL)
     if (currColor) {
       element.style.borderColor = currColor[0]
@@ -31,7 +30,7 @@
       element.style.color = colors[1]
     })
   } 
-  const setHighlighterContext = (element: HTMLElement, imageURL: string) => {
+  const setHighlighterContext = (element: HTMLDivElement, imageURL: string) => {
     const currColor = highlighterColorManager.get(imageURL)
     if (currColor) {
       element.style.backgroundColor = currColor[0]
@@ -87,6 +86,7 @@
   let selectedX: number | null = null
   let selectedY: number | null = null
   let selectedPlacer: Promise<User>  | null = null
+  let loadedPixels: Pick<Pixel, "x"|"y"|"color">[] 
   let color = "#ffffff"
   let preZoomX = 0
   let preZoomY = 0
@@ -95,6 +95,8 @@
   $: selY = selectedY
   $: selPlacer = selectedPlacer
   $: userPresence = extPresence
+  $: downloadedPixels = loadedPixels
+  let handleZoomClick = () => {}
   const placePixel = async() => {
       const placed = await fetch(`/api/v1/placePixel`, {
         method: "POST",
@@ -131,44 +133,44 @@
           break;
       }
     }
-  let handleZoomClick = () => {}
-  const sortPixels = (pixels: Pick<Pixel, "x"|"y"|"color">[]) => {
-    const sorted =  pixels.sort((a,b) => {
-      if (a.y == b.y) {
-        return a.x - b.x
-      }
-      return a.y - b.y
-    })
-    return sorted
-  }
-
-  onMount(async () => {
-    handleZoomClick = () => {
-      const isZoomed = !zoom
-      if (isZoomed) {
-        selX = preZoomX
-        selY = preZoomY
-        return
-      }
-      selX = null
-      selY = null
-    }
-    selPlacer = getSelPlacer()
-    let pixels = await lazy.pixels
-    if (!board || !pixels) {
-      throw error(500, "Failed to load board/pixels!")
-    }
-    const ctx = canvas.getContext('2d')
+  const dynamicPixelCanvas = (element: HTMLCanvasElement, pixels: Pick<Pixel, "x"|"y"|"color">[]) => {
+    const ctx = element.getContext('2d')
     if (!ctx) {
       console.error("Failed to get canvas context!")
       return
     }
-    canvas.height = board.dimY
-    canvas.width = board.dimX
+    element.height = board.dimY
+    element.width = board.dimX
     ctx.imageSmoothingEnabled = false;
     ctx.imageSmoothingQuality = "low";
-        // Add an event listener to the canvas for mouse clicks
-    canvas.addEventListener('click', (event: MouseEvent) => {
+    function createImageData(ctx: CanvasRenderingContext2D, pixels: Pick<Pixel, "x"|"y"|"color">[]) {
+      const imageData = ctx.createImageData(element.width, element.height);
+      for (const pixel of pixels) {
+          const { x, y, color } = pixel;
+          const index = (y * element.width + x) * 4;
+          const [r, g, b] = hexToRgb(color);
+          imageData.data[index] = r;
+          imageData.data[index + 1] = g;
+          imageData.data[index + 2] = b;
+          imageData.data[index + 3] = 255; // Alpha channel (fully opaque)
+      }
+      return imageData;
+    }
+    const sortPixels = (pixels: Pick<Pixel, "x"|"y"|"color">[]) => {
+      const sorted =  pixels.sort((a,b) => {
+        if (a.y == b.y) {
+          return a.x - b.x
+        }
+        return a.y - b.y
+      })
+      return sorted
+    }
+    if (pixels) {
+      const sortedPixels = sortPixels(pixels)
+      const imageData = createImageData(ctx, sortedPixels);
+      ctx.putImageData(imageData, 0, 0);
+    }
+    element.addEventListener('click', (event: MouseEvent) => {
       // Get the mouse click coordinates relative to the canvas
       const x = event.offsetX;
       const y = event.offsetY;
@@ -186,59 +188,37 @@
         }
       }
     });
-    // Function to convert the pixel array into ImageData
-    function createImageData(pixels: Pick<Pixel, "x"|"y"|"color">[]) {
-      if (!ctx) {
-        console.error("Failed to get canvas context!")
+  }
+
+  onMount(async () => {
+    handleZoomClick = () => {
+      const isZoomed = !zoom
+      if (isZoomed) {
+        selX = preZoomX
+        selY = preZoomY
         return
       }
-      const imageData = ctx.createImageData(canvas.width, canvas.height);
-      for (const pixel of pixels) {
-          const { x, y, color } = pixel;
-          const index = (y * canvas.width + x) * 4;
-          const [r, g, b] = hexToRgb(color);
-          imageData.data[index] = r;
-          imageData.data[index + 1] = g;
-          imageData.data[index + 2] = b;
-          imageData.data[index + 3] = 255; // Alpha channel (fully opaque)
-      }
-      return imageData;
+      selX = null
+      selY = null
     }
-    // helper function to update canvas with passed in pixels
-    const updateCanvas = (pixels: Pick<Pixel, "x" | "y" | "color">[],newPixels: Pick<Pixel, "x" | "y" | "color">[] = []): Pick<Pixel, "x" | "y" | "color">[] => {
-      if (newPixels.length === 0) {
-        const sortedPixels = sortPixels(pixels); // Define the sorting logic
-        const updatedImageData = createImageData(sortedPixels);
-        if (!updatedImageData) {
-          console.error("Failed to create ImageData!");
-          return pixels; // Return null to indicate failure
-        }
-        ctx.putImageData(updatedImageData, 0, 0);
-        return pixels; // Nothing to update, return the original pixels
-      }
-      const updatedPixels = pixels.filter((pixel) => {
-        return !newPixels.some(
-          (newPixel) => pixel.x === newPixel.x && pixel.y === newPixel.y
-        );
-      });
-      // Push all elements from newPixels into updatedPixels
-      updatedPixels.push(...newPixels);
-      const sortedPixels = sortPixels(updatedPixels); // Define the sorting logic
-      const updatedImageData = createImageData(sortedPixels);
-      if (!updatedImageData) {
-        console.error("Failed to create ImageData!");
-        return pixels; // Return null to indicate failure
-      }
-      ctx.putImageData(updatedImageData, 0, 0);
-      return sortedPixels; // Return the updated pixels
-    };
+    selPlacer = getSelPlacer()
+    downloadedPixels = await lazy.pixels
+    if (!board || !downloadedPixels) {
+      throw error(500, "Failed to load board/pixels!")
+    }
     pixelUpdates.subscribe((lastPixelUpdates) => {
       try {
         if (lastPixelUpdates == '') {
           return
         }
         const updates = (JSON.parse(lastPixelUpdates)).pixelUpdates as Pick<Pixel, "x"|"y"|"color">[]
-        pixels = updateCanvas(pixels, updates)
+        console.log(updates)
+        const newPixels = downloadedPixels.filter((pixel) => {
+          return !updates.some((update) => {
+            return update.x == pixel.x && update.y == pixel.y
+          })
+        })
+        downloadedPixels = (newPixels.concat(updates))
       } catch (err) {
         console.error(err)
       }
@@ -258,7 +238,6 @@
         console.error(err)
       }
     })
-    updateCanvas(pixels, [])
   })
 </script>
 
@@ -276,12 +255,13 @@
     </h1>
     <iconify-icon icon="eos-icons:spinner" class="animate-spin" />
   </div>
-  {:then pixels}
-  <!-- make a screen size scrollable and zoomable canvas element where user will be able to select the pixel -->
+  {:then}
   <div class="canvas-container" id="canvas-container">
     <input type="hidden" name="X" value={selX} />
     <input type="hidden" name="Y" value={selY} />
-    <canvas bind:this={canvas} class:zoom={zoom} />
+    {#key downloadedPixels}
+    <canvas class:zoom={zoom} use:dynamicPixelCanvas={downloadedPixels} />
+    {/key}
     <div class="absolute">
       {#key userPresence}
       {#each userPresence as presence}
@@ -362,7 +342,6 @@
     <div class="w-5" />
   </div>
 </form>
-
 <style lang="postcss">
   .canvas-container {
     width: 100%;
@@ -378,7 +357,6 @@
       transform: scale(40);
     }
   }
-
   @keyframes rainbow-border {
       0% {
           border-image: linear-gradient(45deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);

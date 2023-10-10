@@ -39,25 +39,26 @@ export const POST = async ({locals, request}) => {
     throw error(400, "Invalid x, y, or color")
   }
 
-
-  const updatedPixel = await locals.db.pixel.update({
-    where: {
-      PixelIdentifier: {
-        boardId: board.id,
-        x,
-        y
-      }
-    },
-    data: {
-      color,
-      userId: locals.localUser.id
+  
+  const updateDb = async() => {
+    if (!locals.localUser) {
+      throw error(401, "Not logged in")
     }
-  })
-
-  const pushEl = {x: updatedPixel.x, y: updatedPixel.y, color: updatedPixel.color}
-
-  pixelUpdatesManager.addPixelUpdate([pushEl])
-
+    await locals.db.pixel.update({
+      where: {
+        PixelIdentifier: {
+          boardId: board.id,
+          x,
+          y
+        }
+      },
+      data: {
+        color,
+        userId: locals.localUser.id
+      }
+    })
+  }
+  
   // asynchronously update pixel cache in redis
   const updateCache = async() => {
     const pixelCache = await redis.get('pixels')
@@ -72,8 +73,11 @@ export const POST = async ({locals, request}) => {
     pixels[pixelIndex] = pushEl
     redis.set('pixels', JSON.stringify(pixels))
   }
-
+  
   updateCache()
+  updateDb()
+  const pushEl = {x, y, color}
+  pixelUpdatesManager.addPixelUpdate([pushEl])
 
-  return json(updatedPixel)
+  return json({})
 }
