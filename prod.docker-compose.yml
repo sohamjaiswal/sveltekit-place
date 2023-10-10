@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   guilded-place-redis:
-    container_name: redis
+    container_name: guilded-place-redis
     image: redis:7.2.1-alpine
     restart: always
     ports:
@@ -13,7 +13,7 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD-password}
       - REDIS_PORT=${REDIS_PORT-6379}
   guilded-place-db:
-    container_name: db
+    container_name: guilded-place-db
     image: postgres:16-alpine
     restart: always
     environment:
@@ -23,7 +23,7 @@ services:
     ports:
       - ${DB_PORT:?MUST SET DB PORT}:5432
   guilded-place-app:
-    container_name: app
+    container_name: guilded-place-app
     build: 
       context: .
       dockerfile: ./docker/prod/app.dockerfile
