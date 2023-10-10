@@ -234,6 +234,9 @@
           if (selY == null) {
             selY = 0
           } else {
+            if (selY <= 0) {
+              selY = board?.dimY -1 ?? 0
+            }
             selY = selY - 1
           }
           updatePresence()
@@ -242,6 +245,9 @@
           if (selY == null) {
             selY = 0
           } else {
+            if (selY >= (board?.dimY-1 ?? 0)) {
+              selY = 0
+            }
             selY = selY + 1
           }
           updatePresence()
@@ -250,6 +256,9 @@
           if (selX == null) {
             selX = 0
           } else {
+            if (selX <= 0) {
+              selX = board?.dimX ?? 0
+            }
             selX = selX - 1
           }
           updatePresence()
@@ -258,6 +267,9 @@
           if (selX == null) {
             selX = 0
           } else {
+            if (selX >= (board?.dimX-1 ?? 0)) {
+              selX = 0
+            }
             selX = selX + 1
           }
           updatePresence()
