@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import { getColorsFromImage, hexToRgb, rgbToHex, type UserPresence } from '$lib/common';
 	import type { Pixel, User } from '@prisma/client';
-	import { Avatar } from '@skeletonlabs/skeleton';;
+	import { Avatar, type ToastSettings, getToastStore } from '@skeletonlabs/skeleton';;
 	import { error } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
   import { source } from 'sveltekit-sse'
@@ -11,6 +11,7 @@
   const presenceUpdates = connection.select('user-presence')
   export let data;
   const {lazy, board} = data
+  const toastStore = getToastStore();
   let canvas: HTMLCanvasElement
   let highlighterColorManager = new Map<string, string[]>()
   const setHighlighterColor = (element: HTMLElement, imageURL: string) => {
@@ -48,12 +49,7 @@
     return (await fetch(`/api/v1/getPlacer?x=${x}&y=${y}`)).json() as Promise<User>
   }
   async function setPresence (x: number, y: number){
-    // check if color is valid hex
-    if (!color.match(/^#[0-9A-F]{6}$/i)) {
-      console.error("Invalid color!")
-      return
-    }
-    await fetch(`/api/v1/updatePresence`, {
+    const res = await fetch(`/api/v1/updatePresence`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -62,9 +58,31 @@
         x: x,
         y: y
       })
-    }).catch((err) => {
-      console.error(err)
     })
+    console.log(res)
+    switch (res.status) {
+      case 400||404:
+        toastStore.trigger({
+          message: `Invalid position!`,
+          background: "variant-filled-error",
+          timeout: 2000
+        })
+        break;
+      case 401:
+        toastStore.trigger({
+          message: `You must be logged in to place pixels!`,
+          background: "variant-filled-error",
+          timeout: 2000
+        })
+        break;
+      case 500:
+        toastStore.trigger({
+          message: `Failed to place pixel! (Server error...)`,
+          background: "variant-filled-error",
+          timeout: 2000
+        })
+        break;
+    }
   }
   $: zoom = false
   let selectedX: number | null = null
@@ -79,7 +97,7 @@
   $: selPlacer = selectedPlacer
   $: userPresence = extPresence
   const placePixel = async() => {
-      await fetch(`/api/v1/placePixel`, {
+      const placed = await fetch(`/api/v1/placePixel`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -89,9 +107,31 @@
           y: selY,
           color: color
         })
-      }).catch((err) => {
-        console.error(err)
       })
+      console.log(placed)
+      switch (placed.status) {
+        case 400:
+          toastStore.trigger({
+            message: `Invalid color or position!`,
+            background: "variant-filled-error",
+            timeout: 2000
+          })
+          break;
+        case 401:
+          toastStore.trigger({
+            message: `You must be logged in to place pixels!`,
+            background: "variant-filled-error",
+            timeout: 2000
+          })
+          break;
+        case 500:
+          toastStore.trigger({
+            message: `Failed to place pixel! (Server error...)`,
+            background: "variant-filled-error",
+            timeout: 2000
+          })
+          break;
+      }
     }
   let handleZoomClick = () => {}
   const sortPixels = (pixels: Pick<Pixel, "x"|"y"|"color">[]) => {

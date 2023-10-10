@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '../app.postcss';
 	import 'iconify-icon';
-	import { getDrawerStore, initializeStores, Drawer, Avatar, LightSwitch, type DrawerSettings } from '@skeletonlabs/skeleton';
+	import { getDrawerStore, initializeStores, Drawer, Avatar, LightSwitch, type DrawerSettings, Toast } from '@skeletonlabs/skeleton';
 
 	// Floating UI for Popups
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
@@ -19,6 +19,8 @@
 		rounded: 'rounded-none',
 	}
 </script>
+
+<Toast />
 
 <Drawer position="right">
 	<div class="flex flex-col gap-4 mt-4 items-center w-full">
