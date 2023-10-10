@@ -133,6 +133,11 @@
           break;
       }
     }
+    const updatePresence = () => {
+      if ($page.data.localUser && selX !== null && selY !== null) {
+        setPresence(selX, selY)
+      }
+    }
   const dynamicPixelCanvas = (element: HTMLCanvasElement, pixels: Pick<Pixel, "x"|"y"|"color">[]) => {
     const ctx = element.getContext('2d')
     if (!ctx) {
@@ -181,16 +186,98 @@
         selX = x
         selY = y
       }
-      if (selX !== null && selY !== null) {
-        selPlacer = getSelPlacer(selX, selY)
-        if ($page.data.localUser) {
-          setPresence(selX, selY)
-        }
-      }
+      updatePresence()
     });
   }
-
+  let handleKeyDown = (event: KeyboardEvent) => {}
   onMount(async () => {
+    const openEyeDropper = () => {
+      if (!window.EyeDropper) {
+            // show toast
+            toastStore.trigger({
+              message: `Your browser does not support the eyedropper API!`,
+              background: "variant-filled-error",
+              timeout: 2000
+            })
+          }
+          // open eyedropper
+          const eyeDropper = new EyeDropper();
+          const abortController = new AbortController();
+  
+          eyeDropper
+            .open({ signal: abortController.signal })
+            .then((result: {sRGBHex: string}) => {
+              color = result.sRGBHex;
+            })
+            .catch((e: unknown) => {
+              // show toast
+              toastStore.trigger({
+                message: `Failed to get color!`,
+                background: "variant-filled-error",
+                timeout: 2000
+              })
+            });
+  
+          setTimeout(() => {
+            abortController.abort();
+          }, 2000);
+    }
+    handleKeyDown = (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "Escape":
+          zoom = false
+          break;
+        case "z":
+          zoom = !zoom
+          break;
+        case "ArrowUp":
+          if (selY == null) {
+            selY = 0
+          } else {
+            selY = selY - 1
+          }
+          updatePresence()
+          break;
+        case "ArrowDown":
+          if (selY == null) {
+            selY = 0
+          } else {
+            selY = selY + 1
+          }
+          updatePresence()
+          break;
+        case "ArrowLeft":
+          if (selX == null) {
+            selX = 0
+          } else {
+            selX = selX - 1
+          }
+          updatePresence()
+          break;
+        case "ArrowRight":
+          if (selX == null) {
+            selX = 0
+          } else {
+            selX = selX + 1
+          }
+          updatePresence()
+          break;
+        case "Enter":
+          // submit pixel
+          placePixel()
+          break;
+        case "Space":
+          // submit pixel
+          placePixel()
+          break;
+        case "e":
+          openEyeDropper()
+          break
+        case "i":
+          openEyeDropper()
+          break
+        }
+    }
     handleZoomClick = () => {
       const isZoomed = !zoom
       if (isZoomed) {
@@ -342,6 +429,7 @@
     <div class="w-5" />
   </div>
 </form>
+<svelte:window on:keydown={handleKeyDown} />
 <style lang="postcss">
   .canvas-container {
     width: 100%;
