@@ -1,6 +1,17 @@
 version: "3.3"
 
 services:
+  guilded-place-redis:
+    container_name: redis
+    image: redis:7.2.1-alpine
+    restart: always
+    ports:
+      - ${REDIS_PORT-6379}:${REDIS_PORT-6379}
+    volumes:
+      - ./redis:/data
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD-password}
+      - REDIS_PORT=${REDIS_PORT-6379}
   guilded-place-db:
     container_name: db
     image: postgres:16-alpine
@@ -31,3 +42,4 @@ services:
       PUBLIC_CARDBOARD_URL: ${PUBLIC_CARDBOARD_URL:?Get url at https://cardboard.ink/}
       PUBLIC_CURRENT_BOARD: ${CURRENT_BOARD:?Board Param is required, set to empty string if none yet.}
       PROD: ${PROD:?PROD PARAM REQUIRED}
+      REDIS_URL: redis://default:${REDIS_PASSWORD-password}@redis:${REDIS_PORT-6379}/0
