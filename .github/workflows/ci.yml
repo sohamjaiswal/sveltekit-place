@@ -16,7 +16,7 @@ jobs:
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       JWT_SECRET: ${{secrets.JWT_SECRET}}
       CARDBOARD_TOKEN: ${{vars.CARDBOARD_TOKEN}}
-      PORT_BINDING: ${{vars.PORT_BINDING}}
+      APP_PORT: ${{vars.APP_PORT}}
       PUBLIC_CARDBOARD_URL: ${{vars.PUBLIC_CARDBOARD_URL}}
       PUBLIC_CURRENT_BOARD: ${{vars.PUBLIC_CURRENT_BOARD}}
       PROD: ${{vars.PROD}}

@@ -21,7 +21,7 @@ services:
     volumes:
       - ./db:/var/lib/postgresql/data
     ports:
-      - 5432:5432
+      - ${DB_PORT:?MUST SET DB PORT}:5432
   guilded-place-app:
     container_name: app
     build: 
@@ -31,7 +31,7 @@ services:
     depends_on:
       - guilded-place-db
     ports:
-      - ${PORT_BINDING:?PORT BINDING REQUIRED}
+      - ${APP_PORT}:${APP_PORT}
     volumes:
       - ./app:/app
     environment:
@@ -43,3 +43,4 @@ services:
       PUBLIC_CURRENT_BOARD: ${CURRENT_BOARD:?Board Param is required, set to empty string if none yet.}
       PROD: ${PROD:?PROD PARAM REQUIRED}
       REDIS_URL: redis://default:${REDIS_PASSWORD-password}@redis:${REDIS_PORT-6379}/0
+      APP_PORT: ${APP_PORT}
