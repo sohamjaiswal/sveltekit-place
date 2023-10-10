@@ -13,5 +13,5 @@ app.get('/healthcheck', (req, res) => {
 app.use(handler);
 
 app.listen(process.env.APP_PORT, () => {
-    console.log('🚀 listening on port 3000');
+    console.log(`🚀 listening on port ${process.env.APP_PORT}`);
 });
