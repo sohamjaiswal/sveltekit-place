@@ -35,12 +35,12 @@ services:
     volumes:
       - ./app:/app
     environment:
-      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:?password missing}@db:5432/postgres
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:?password missing}@guilded-place-db:5432/postgres
       JWT_SECRET: ${JWT_SECRET:?JWT SECRET REQUIRED}
       CARDBOARD_TOKEN: ${CARDBOARD_TOKEN:?Get token at https://cardboard.ink/}
       CARDBOARD_SECRET: ${CARDBOARD_SECRET:?Get secret at https://cardboard.ink/}
       PUBLIC_CARDBOARD_URL: ${PUBLIC_CARDBOARD_URL:?Get url at https://cardboard.ink/}
       PUBLIC_CURRENT_BOARD: ${PUBLIC_CURRENT_BOARD:?Board Param is required, set to empty string if none yet.}
       PROD: ${PROD:?PROD PARAM REQUIRED}
-      REDIS_URL: redis://default:${REDIS_PASSWORD-password}@redis:${REDIS_PORT-6379}/0
+      REDIS_URL: redis://default:${REDIS_PASSWORD-password}@guilded-place-redis:${REDIS_PORT-6379}/0
       APP_PORT: ${APP_PORT}
