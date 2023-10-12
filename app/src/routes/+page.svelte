@@ -418,35 +418,33 @@
       <p>
         Selected Pixel: ({selX}, {selY})
       </p>
-        {#key selPlacer}
-          {#await selPlacer}
-            <iconify-icon icon="eos-icons:spinner" class="animate-spin" />
-          {:then placer} 
-          {#if placer}
-            <div class="flex items-center justify-center gap-2">
-              ·
-              <a href={`http://guilded.gg/profile/${placer.id}`} target="_blank" class="inline">
-                <div class="flex items-center gap-2">
-                  <Avatar src={placer.avatar} width="w-8" rounded="rounded-none" />
-                  {placer.username}
-                </div>
-              </a>
-              {#if $page.data.localUser}
-                {#if placer.id == $page.data.localUser.id}
-                  <span class="badge variant-filled-secondary">YOU</span>
-                {/if}
+        {#await selPlacer}
+          <iconify-icon icon="eos-icons:spinner" class="animate-spin" />
+        {:then placer} 
+        {#if placer}
+          <div class="flex items-center justify-center gap-2">
+            ·
+            <a href={`http://guilded.gg/profile/${placer.id}`} target="_blank" class="inline">
+              <div class="flex items-center gap-2">
+                <Avatar src={placer.avatar} width="w-8" rounded="rounded-none" />
+                {placer.username}
+              </div>
+            </a>
+            {#if $page.data.localUser}
+              {#if placer.id == $page.data.localUser.id}
+                <span class="badge variant-filled-secondary">YOU</span>
               {/if}
-              {#if placer.role == "ADMIN"}
-              <span class="badge variant-filled-tertiary">ADMIN</span>
-              {/if}
-            </div>
-          {/if}
-          {:catch}
-            <p class="flex justify-center items-center text-center w-full h-full text-error-500">
-              Failed to load placer!
-            </p>
-          {/await}
-        {/key}
+            {/if}
+            {#if placer.role == "ADMIN"}
+            <span class="badge variant-filled-tertiary">ADMIN</span>
+            {/if}
+          </div>
+        {/if}
+        {:catch}
+          <p class="flex justify-center items-center text-center w-full h-full text-error-500">
+            Failed to load placer!
+          </p>
+        {/await}
     </div>
     {/if}
     <div class="w-5" />
