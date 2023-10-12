@@ -57,6 +57,26 @@ export const POST = async ({locals, request}) => {
         userId: locals.localUser.id
       }
     })
+      // increment user total placed pixel count
+
+    const user = await locals.db.user.findUnique({
+      where: {
+        id: locals.localUser.id
+      }
+    })
+
+    if (!user) {
+      throw error(500, "User not found")
+    }
+
+    await locals.db.user.update({
+      where: {
+        id: locals.localUser.id
+      },
+      data: {
+        totalPixelsChanged: user.totalPixelsChanged + 1
+      }
+    })
   }
   
   // asynchronously update pixel cache in redis

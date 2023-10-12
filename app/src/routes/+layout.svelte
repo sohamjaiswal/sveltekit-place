@@ -23,43 +23,55 @@
 <Toast />
 
 <Drawer position="right">
-	<div class="flex flex-col gap-4 mt-4 items-center w-full">
-		<a href="/">
-			<h2>
-				Guilded Place
-			</h2>
-		</a>
-		{#if $page.data.localUser}
-		<a href="profile" on:click={() => drawerStore.close()} >
-		<div class="flex flex-col items-center w-full">
-				<Avatar src={$page.data.localUser.avatar} width="w-16" rounded="rounded-none" />
-				<div class="flex gap-2 items-center mt-2">
-					{$page.data.localUser.username}
-					{#if $page.data.localUser.role == "ADMIN"}
-					·
-					<span class="badge variant-filled-tertiary">ADMIN</span>
-					{/if}
+	<div class="flex flex-col h-full p-4 justify-between">
+		<div class="flex flex-col gap-4 mt-4 items-center w-full">
+			<a href="/">
+				<h2>
+					GPlace
+				</h2>
+			</a>
+			{#if $page.data.localUser}
+			<a href="profile" on:click={() => drawerStore.close()} >
+			<div class="flex flex-col items-center w-full">
+					<Avatar src={$page.data.localUser.avatar} width="w-16" rounded="rounded-none" />
+					<div class="flex gap-2 items-center mt-2">
+						{$page.data.localUser.username}
+						{#if $page.data.localUser.role == "ADMIN"}
+						·
+						<span class="badge variant-filled-tertiary">ADMIN</span>
+						{/if}
+					</div>
 				</div>
-			</div>
-		</a>
-		<hr class="w-2/3" />
-		{/if}
-		{#if $page.data.localUser}
-		<a href="settings" on:click={() => drawerStore.close()}>
-			Settings
-		</a>
-		<hr class="w-2/3" />
-		<LightSwitch />
-		<hr class="w-2/3" />
-		<form action="/logout" method="POST">
-			<button class="btn variant-ghost-error mb-4" type="submit">
-				Logout
-			</button>
-		</form>
-		{:else}
-		<hr class="w-2/3" />
-			<LoginWithGuilded />
-		{/if}
+			</a>
+			{/if}
+			<hr class="w-2/3" />
+			<a href="/tips" target="_blank" rel="noopener noreferrer">Tips</a>
+			<a href="/leaderboard" target="_blank" rel="noopener noreferrer">Leaderboard</a>
+			{#if $page.data.localUser}
+			<a href="settings" on:click={() => drawerStore.close()}>
+				Settings
+			</a>
+			<LightSwitch />
+			<hr class="w-2/3" />
+			<form action="/logout" method="POST">
+				<button class="btn variant-ghost-error mb-4" type="submit">
+					Logout
+				</button>
+			</form>
+			{:else}
+			<hr class="w-2/3" />
+				<LoginWithGuilded />
+			{/if}
+		</div>
+		<footer class="flex flex-col gap-4 mt- items-center w-full">
+			<hr class="w-2/3" />
+			<p>
+				Join our
+				<a href="https://www.guilded.gg/i/EzrJGDdE" target="_blank">
+					Guilded Server!
+				</a>
+			</p>
+		</footer>
 	</div>
 </Drawer>
 
