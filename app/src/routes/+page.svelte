@@ -44,9 +44,6 @@
       element.style.backgroundColor = colors[0]
     })
   }
-  async function getSelPlacer (x: number = 0, y: number = 0) {
-    return (await fetch(`/api/v1/getPlacer?x=${x}&y=${y}`)).json() as Promise<User>
-  }
   async function setPresence (x: number, y: number){
     const res = await fetch(`/api/v1/updatePresence`, {
       method: "POST",
@@ -97,6 +94,13 @@
   $: userPresence = extPresence
   $: downloadedPixels = loadedPixels
   let handleZoomClick = () => {}
+  async function getSelPlacer () {
+    if (selX == null || selY == null) {
+      return null
+    }
+    selPlacer = (await fetch(`/api/v1/getPlacer?x=${selX}&y=${selY}`)).json() as Promise<User>
+    return selPlacer
+  }
   const placePixel = async() => {
       const placed = await fetch(`/api/v1/placePixel`, {
         method: "POST",
@@ -186,6 +190,7 @@
         selX = x
         selY = y
       }
+      getSelPlacer()
       updatePresence()
     });
   }
@@ -222,6 +227,12 @@
             abortController.abort();
           }, 2000);
     }
+    const keyboardUpdate = async () => {
+      updatePresence()
+      if (selX != null && selY != null) {
+        getSelPlacer()
+      }
+    }
     handleKeyDown = (event: KeyboardEvent) => {
       switch (event.key) {
         case "Escape":
@@ -239,7 +250,7 @@
             }
             selY = selY - 1
           }
-          updatePresence()
+          keyboardUpdate()
           break;
         case "ArrowDown":
           if (selY == null) {
@@ -250,7 +261,7 @@
             }
             selY = selY + 1
           }
-          updatePresence()
+          keyboardUpdate()
           break;
         case "ArrowLeft":
           if (selX == null) {
@@ -261,7 +272,7 @@
             }
             selX = selX - 1
           }
-          updatePresence()
+          keyboardUpdate()
           break;
         case "ArrowRight":
           if (selX == null) {
@@ -272,7 +283,7 @@
             }
             selX = selX + 1
           }
-          updatePresence()
+          keyboardUpdate()
           break;
         case "Enter":
           // submit pixel
@@ -300,7 +311,7 @@
       selX = null
       selY = null
     }
-    selPlacer = getSelPlacer()
+    getSelPlacer()
     downloadedPixels = await lazy.pixels
     if (!board || !downloadedPixels) {
       throw error(500, "Failed to load board/pixels!")
