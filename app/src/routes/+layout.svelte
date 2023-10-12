@@ -75,6 +75,19 @@
 	</div>
 </Drawer>
 
+<svelte:head>
+  <title>
+    GPlace!
+  </title>
+  <meta property="og:title" content="GPlace" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://gplace.ink" />
+  <meta property="og:image" content="https://gplace.ink/favicon.png" />
+  <meta property="og:description" content="Create pixel art together!" />
+	<meta name="keywords" content="Guilded, GPlace, r/place, Pixel Art">
+  <meta name="author" content="Ham aka TooMuchHam, SoSweetHam">
+</svelte:head>
+
 <div class="root-container relative h-screen w-screen">
 	<button on:click={() => drawerStore.open(drawerSettings)} class="btn variant-filled-primary fixed bottom-3 right-3 z-20">
 		<iconify-icon icon="fa-solid:bars" />
