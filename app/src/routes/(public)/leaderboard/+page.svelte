@@ -22,7 +22,7 @@
   Loading...
 </h1>
 {:then topChangers}
-<div class="flex flex-col items-center gap-4 mt-4">
+<div class="flex flex-col items-center gap-4 mt-4 overflow-y-auto">
   <h1>
     LEADERBOARD
   </h1>
