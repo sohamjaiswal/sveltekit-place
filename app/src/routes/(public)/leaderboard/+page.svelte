@@ -22,11 +22,12 @@
   Loading...
 </h1>
 {:then topChangers}
-<div class="flex flex-col items-center gap-4 mt-4 h-[calc(100vh-2rem)] overflow-y-auto">
+<div class="flex flex-col items-center gap-4 mt-4 ">
   <h1>
     LEADERBOARD
   </h1>
-  {#each topChangers as topChanger}
+  <div class="h-[calc(100vh-3rem)] overflow-y-auto overflow-x-visible hide-scrollbar">
+    {#each topChangers as topChanger}
     <a class={`card p-4 w-full bg-no-repeat bg-cover card-hover`} style={`background-image: url('${topChanger.banner}');`} target="_blank" href={`https://guilded.gg/profile/${topChanger.id}`}>
       <div class="card-body">
         <div class="flex flex-row justify-between">
@@ -41,7 +42,8 @@
         </div>
       </div>
     </a>
-  {/each}
+    {/each}
+  </div>
 </div>
 {:catch}
 <p class="text-error-500">An error ocurred while getting top placers...</p>
