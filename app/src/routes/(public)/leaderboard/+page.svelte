@@ -34,7 +34,7 @@
       <div style={`background-image: url('${guildedMediaLink(topChanger.banner)}')`} class="card bg-no-repeat bg-cover w-full flex justify-between p-4" >
         <div class="flex flex-row justify-between w-full">
           <div class="flex gap-4 items-center" use:getTextColor={guildedMediaLink(topChanger.banner)}>
-            <Avatar src={topChanger.avatar} width="w-16" rounded="rounded-none" />
+            <Avatar src={guildedMediaLink(topChanger.avatar)} width="w-16" rounded="rounded-none" />
             <h2 class="text-center">{topChanger.username}</h2>
           </div>
           <div class="flex flex-col items-center" use:getTextColor={guildedMediaLink(topChanger.banner)}>
