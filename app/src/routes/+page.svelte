@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { getColorsFromImage, hexToRgb, rgbToHex, type UserPresence } from '$lib/common';
+	import { guildedMediaLink } from '$lib/common/guilded-media.js';
 	import type { Pixel, User } from '@prisma/client';
 	import { Avatar, type ToastSettings, getToastStore } from '@skeletonlabs/skeleton';;
 	import { error } from '@sveltejs/kit';
@@ -61,21 +62,21 @@
           message: `Invalid position!`,
           background: "variant-filled-error",
           timeout: 2000
-        })
+        } as ToastSettings)
         break;
       case 401:
         toastStore.trigger({
           message: `You must be logged in to place pixels!`,
           background: "variant-filled-error",
           timeout: 2000
-        })
+        } as ToastSettings)
         break;
       case 500:
         toastStore.trigger({
           message: `Failed to place pixel! (Server error...)`,
           background: "variant-filled-error",
           timeout: 2000
-        })
+        } as ToastSettings)
         break;
     }
   }
@@ -119,21 +120,21 @@
             message: `Invalid color or position!`,
             background: "variant-filled-error",
             timeout: 2000
-          })
+          } as ToastSettings)
           break;
         case 401:
           toastStore.trigger({
             message: `You must be logged in to place pixels!`,
             background: "variant-filled-error",
             timeout: 2000
-          })
+          } as ToastSettings)
           break;
         case 500:
           toastStore.trigger({
             message: `Failed to place pixel! (Server error...)`,
             background: "variant-filled-error",
             timeout: 2000
-          })
+          } as ToastSettings)
           break;
       }
     }
@@ -203,7 +204,7 @@
               message: `Your browser does not support the eyedropper API!`,
               background: "variant-filled-error",
               timeout: 2000
-            })
+            } as ToastSettings)
           }
           // open eyedropper
           const eyeDropper = new EyeDropper();
@@ -220,7 +221,7 @@
                 message: `Failed to get color!`,
                 background: "variant-filled-error",
                 timeout: 2000
-              })
+              } as ToastSettings)
             });
   
           setTimeout(() => {
@@ -375,9 +376,9 @@
     <div class="absolute">
       {#key userPresence}
       {#each userPresence as presence}
-        <div class={`highlight absolute h-10 w-10 stroke-black ${!zoom ? "hidden" : "block"}`} style="left: {40*presence.x}px; top: {40*presence.y - (board?.dimY ?? 0)}px" use:setHighlighterColor={presence.user.avatar}>
-          <div style="top: 37px; left: -3px;" class="absolute flex justify-between items-center gap-2 p-1" use:setHighlighterColor={presence.user.avatar} use:setHighlighterContext={presence.user.avatar}>
-            <Avatar src={presence.user.avatar} width="w-8" rounded="rounded-none" />
+        <div class={`highlight absolute h-10 w-10 stroke-black ${!zoom ? "hidden" : "block"}`} style="left: {40*presence.x}px; top: {40*presence.y - (board?.dimY ?? 0)}px" use:setHighlighterColor={guildedMediaLink(presence.user.avatar)}>
+          <div style="top: 37px; left: -3px;" class="absolute flex justify-between items-center gap-2 p-1" use:setHighlighterColor={guildedMediaLink(presence.user.avatar)} use:setHighlighterContext={guildedMediaLink(presence.user.avatar)}>
+            <Avatar src={guildedMediaLink(presence.user.avatar)} width="w-8" rounded="rounded-none" />
             <p>
               ·
             </p>
@@ -426,7 +427,7 @@
             ·
             <a href={`http://guilded.gg/profile/${placer.id}`} target="_blank" class="inline">
               <div class="flex items-center gap-2">
-                <Avatar src={placer.avatar} width="w-8" rounded="rounded-none" />
+                <Avatar src={guildedMediaLink(placer.avatar)} width="w-8" rounded="rounded-none" />
                 {placer.username}
               </div>
             </a>
