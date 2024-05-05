@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { guildedMediaLink } from '$lib/common/guilded-media.js';
-	import { getColorsFromImage } from '$lib/common/utils.js';
+	import { getColorsFromImage, PhotoBox  } from '$lib/common';
 	import { Avatar } from '@skeletonlabs/skeleton';
   export let data
 
@@ -31,13 +30,13 @@
   <div class="h-[calc(100vh-3rem)] overflow-y-auto overflow-x-visible hide-scrollbar w-full">
     {#each topChangers as topChanger}
     <a class="w-full" target="_blank" href={`https://guilded.gg/profile/${topChanger.id}`}>
-      <div style={`background-image: url('${guildedMediaLink(topChanger.banner)}')`} class="card bg-no-repeat bg-cover w-full flex justify-between p-4" >
+      <div style={`background-image: url('${PhotoBox.getUserBanner(topChanger.id)}')`} class="card bg-no-repeat bg-cover w-full flex justify-between p-4" >
         <div class="flex flex-row justify-between w-full">
-          <div class="flex gap-4 items-center" use:getTextColor={guildedMediaLink(topChanger.banner)}>
-            <Avatar src={guildedMediaLink(topChanger.avatar)} width="w-16" rounded="rounded-none" />
+          <div class="flex gap-4 items-center" use:getTextColor={PhotoBox.getUserBanner(topChanger.id)}>
+            <Avatar src={PhotoBox.getUserAvatar(topChanger.id)} width="w-16" rounded="rounded-none" />
             <h2 class="text-center">{topChanger.username}</h2>
           </div>
-          <div class="flex flex-col items-center" use:getTextColor={guildedMediaLink(topChanger.banner)}>
+          <div class="flex flex-col items-center" use:getTextColor={PhotoBox.getUserBanner(topChanger.id)}>
             <h3 class="text-center">Points</h3>
             <h3 class="text-center">{topChanger.totalPixelsChanged}</h3>
           </div>
