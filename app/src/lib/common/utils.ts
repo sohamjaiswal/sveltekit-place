@@ -32,7 +32,7 @@ export async function getColorsFromImage(imageUrl: string, quality = 10, palette
         return new Promise<void>((resolve, reject) => {
           img.onload = () => resolve();
           img.onerror = (error) => reject(error);
-          img.src = encodeURIComponent(url);
+          img.src = url;
           img.crossOrigin = "Anonymous";
         });
       };
