@@ -26,16 +26,13 @@ export type RGBColor = [number, number, number];
 export async function getColorsFromImage(imageUrl: string, quality = 10, palette = 2): Promise<string[] | null> {
   if (isBrowser() && !isNode()) {
     try {
-      // Define the proxy URL
-      const proxyUrl = "https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url=";
-  
       const img = new Image();
   
       const loadImage = (url: string) => {
         return new Promise<void>((resolve, reject) => {
           img.onload = () => resolve();
           img.onerror = (error) => reject(error);
-          img.src = proxyUrl + encodeURIComponent(url);
+          img.src = encodeURIComponent(url);
           img.crossOrigin = "Anonymous";
         });
       };
