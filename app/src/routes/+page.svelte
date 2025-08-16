@@ -375,9 +375,9 @@
     <div class="absolute">
       {#key userPresence}
       {#each userPresence as presence}
-        <div class={`highlight absolute h-10 w-10 stroke-black ${!zoom ? "hidden" : "block"}`} style="left: {40*presence.x}px; top: {40*presence.y - (board?.dimY ?? 0)}px" use:setHighlighterColor={PhotoBox.getUserAvatar(presence.user.id)}>
-          <div style="top: 37px; left: -3px;" class="absolute flex justify-between items-center gap-2 p-1" use:setHighlighterColor={PhotoBox.getUserAvatar(presence.user.id)} use:setHighlighterContext={PhotoBox.getUserAvatar(presence.user.id)}>
-            <Avatar src={PhotoBox.getUserAvatar(presence.user.id)} width="w-8" rounded="rounded-none" />
+        <div class={`highlight absolute h-10 w-10 stroke-black ${!zoom ? "hidden" : "block"}`} style="left: {40*presence.x}px; top: {40*presence.y - (board?.dimY ?? 0)}px" use:setHighlighterColor={presence.user.avatar}>
+          <div style="top: 37px; left: -3px;" class="absolute flex justify-between items-center gap-2 p-1" use:setHighlighterColor={presence.user.avatar} use:setHighlighterContext={presence.user.avatar}>
+            <Avatar src={presence.user.avatar} width="w-8" rounded="rounded-none" />
             <p>
               ·
             </p>
@@ -426,7 +426,7 @@
             ·
             <a href={`http://guilded.gg/profile/${placer.id}`} target="_blank" class="inline">
               <div class="flex items-center gap-2">
-                <Avatar src={PhotoBox.getUserAvatar(placer.id)} width="w-8" rounded="rounded-none" />
+                <Avatar src={placer.avatar} width="w-8" rounded="rounded-none" />
                 {placer.username}
               </div>
             </a>
